@@ -1,7 +1,8 @@
+
 import { PortfolioItem, Service, ModelBio } from "../types";
 import { MODEL_STATS, SERVICES, PORTFOLIO_ITEMS } from "../constants";
 import { db } from "./firebase";
-import { doc, getDoc, setDoc, collection, getDocs, addDoc, deleteDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc, collection, getDocs, addDoc, deleteDoc, query, where } from "firebase/firestore";
 
 /**
  * CMS SERVICE - FIREBASE IMPLEMENTATION
@@ -13,6 +14,30 @@ const COLLECTIONS = {
     BIO: 'bio',
     PORTFOLIO: 'portfolio',
     SERVICES: 'services'
+};
+
+// --- HELPER: MIGRATION ---
+
+const ensurePortfolioInitialized = async () => {
+    const coll = collection(db, COLLECTIONS.PORTFOLIO);
+    const snapshot = await getDocs(coll);
+    
+    // If DB is empty, populate it with the hardcoded demo data
+    if (snapshot.empty) {
+        console.log("Initializing Portfolio DB with demo data...");
+        const promises = PORTFOLIO_ITEMS.map(item => {
+             const cleanItem = {
+                id: item.id,
+                src: item.src || '',
+                category: item.category || 'editorial',
+                title: item.title || 'Untitled',
+                client: item.client || '',
+                height: item.height || 800
+            };
+            return addDoc(coll, cleanItem);
+        });
+        await Promise.all(promises);
+    }
 };
 
 // --- BIO & STATS ---
@@ -40,7 +65,21 @@ export const getModelBio = async (): Promise<ModelBio> => {
 };
 
 export const updateModelBio = async (data: ModelBio): Promise<void> => {
-    await setDoc(doc(db, COLLECTIONS.BIO, 'main'), data);
+    // Helper to remove undefined fields which crash Firestore
+    const cleanStats = data.stats.map(s => ({
+        label: s.label || '',
+        value: s.value || ''
+    }));
+    
+    const cleanData = {
+        headline: data.headline || '',
+        intro: data.intro || '',
+        bio: data.bio || '',
+        profileImage: data.profileImage || '',
+        stats: cleanStats
+    };
+
+    await setDoc(doc(db, COLLECTIONS.BIO, 'main'), cleanData);
 };
 
 // --- PORTFOLIO ---
@@ -71,17 +110,53 @@ export const getPortfolioItems = async (category?: string): Promise<PortfolioIte
 };
 
 export const addPortfolioItem = async (item: PortfolioItem): Promise<void> => {
+    // Ensure demo data exists in DB before adding new item
+    await ensurePortfolioInitialized();
+
     const numericId = Date.now();
-    await addDoc(collection(db, COLLECTIONS.PORTFOLIO), { ...item, id: numericId });
+    // Ensure no undefined values
+    const cleanItem = {
+        id: numericId,
+        src: item.src || '',
+        category: item.category || 'editorial',
+        title: item.title || 'Untitled',
+        client: item.client || '',
+        height: item.height || 800
+    };
+    await addDoc(collection(db, COLLECTIONS.PORTFOLIO), cleanItem);
+};
+
+export const updatePortfolioItem = async (item: PortfolioItem): Promise<void> => {
+    // Ensure demo data exists in DB before updating
+    await ensurePortfolioInitialized();
+
+    // Find document by the custom 'id' field
+    const q = query(collection(db, COLLECTIONS.PORTFOLIO), where("id", "==", item.id));
+    const querySnapshot = await getDocs(q);
+    
+    const updatePromises = querySnapshot.docs.map(d => {
+        const cleanItem = {
+            id: item.id,
+            src: item.src || '',
+            category: item.category || 'editorial',
+            title: item.title || 'Untitled',
+            client: item.client || '',
+            height: item.height || 800
+        };
+        return setDoc(doc(db, COLLECTIONS.PORTFOLIO, d.id), cleanItem, { merge: true });
+    });
+    
+    await Promise.all(updatePromises);
 };
 
 export const deletePortfolioItem = async (numericId: number): Promise<void> => {
-    const querySnapshot = await getDocs(collection(db, COLLECTIONS.PORTFOLIO));
-    querySnapshot.forEach(async (d) => {
-        if (d.data().id === numericId) {
-            await deleteDoc(doc(db, COLLECTIONS.PORTFOLIO, d.id));
-        }
-    });
+    // Ensure demo data exists in DB before deleting (so we don't end up with an empty list)
+    await ensurePortfolioInitialized();
+
+    const q = query(collection(db, COLLECTIONS.PORTFOLIO), where("id", "==", numericId));
+    const querySnapshot = await getDocs(q);
+    const deletePromises = querySnapshot.docs.map(d => deleteDoc(doc(db, COLLECTIONS.PORTFOLIO, d.id)));
+    await Promise.all(deletePromises);
 };
 
 // --- SERVICES ---
@@ -110,6 +185,14 @@ export const updateServices = async (services: Service[]): Promise<void> => {
     const deletePromises = querySnapshot.docs.map(d => deleteDoc(doc(db, COLLECTIONS.SERVICES, d.id)));
     await Promise.all(deletePromises);
 
-    const addPromises = services.map(service => addDoc(collection(db, COLLECTIONS.SERVICES), service));
+    const addPromises = services.map(service => {
+        const cleanService = {
+            title: service.title || '',
+            description: service.description || '',
+            priceRange: service.priceRange || '',
+            priceDetails: service.priceDetails || ''
+        };
+        return addDoc(collection(db, COLLECTIONS.SERVICES), cleanService);
+    });
     await Promise.all(addPromises);
 };

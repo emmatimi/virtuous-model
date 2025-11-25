@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
-import { getModelBio, updateModelBio, getPortfolioItems, addPortfolioItem, deletePortfolioItem, getServices, updateServices } from '../services/cms';
+import { getModelBio, updateModelBio, getPortfolioItems, addPortfolioItem, updatePortfolioItem, deletePortfolioItem, getServices, updateServices } from '../services/cms';
 import { logout } from '../services/auth';
 import { ModelBio, PortfolioItem, Service, Page } from '../types';
 import { LogOut, Save, Trash2, Plus, Layout, User, Briefcase, Image as ImageIcon, CheckCircle2, Server } from 'lucide-react';
@@ -47,6 +46,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) => {
         setTimeout(() => setNotification(null), 3000);
     };
 
+    // --- BIO HANDLERS ---
     const handleSaveBio = async () => {
         if (!bio) return;
         setSaving(true);
@@ -55,6 +55,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) => {
         showNotification("Biography Saved Successfully");
     };
 
+    // --- PORTFOLIO HANDLERS ---
     const handleDeletePortfolio = async (id: number) => {
         if (confirm('Delete this image?')) {
             await deletePortfolioItem(id);
@@ -81,6 +82,22 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) => {
         showNotification("Portfolio Item Added");
     };
 
+    const handleUpdatePortfolioState = (id: number, field: keyof PortfolioItem, value: any) => {
+        setPortfolio(prev => prev.map(item => 
+            item.id === id ? { ...item, [field]: value } : item
+        ));
+    };
+
+    const handleSavePortfolio = async () => {
+        setSaving(true);
+        // In a more complex app we would track dirty states, but for now we update all to ensure consistency
+        const promises = portfolio.map(item => updatePortfolioItem(item));
+        await Promise.all(promises);
+        setSaving(false);
+        showNotification("Portfolio Changes Saved");
+    };
+
+    // --- SERVICES HANDLERS ---
     const handleUpdateService = (index: number, field: keyof Service, value: string) => {
         const updated = [...services];
         updated[index] = { ...updated[index], [field]: value };
@@ -143,9 +160,8 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) => {
                     <div className="p-6 bg-gray-50 border-t border-gray-100">
                         <div className="flex items-center gap-2 text-[10px] uppercase tracking-widest text-green-600">
                             <Server size={12} />
-                            <span>Auto-save Active</span>
+                            <span>Cloud Storage Active</span>
                         </div>
-                        <p className="text-[10px] text-gray-400 mt-1">Local Storage Persisted</p>
                     </div>
                 </div>
 
@@ -221,6 +237,18 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) => {
                     {/* --- PORTFOLIO TAB --- */}
                     {activeTab === 'portfolio' && (
                         <div className="max-w-6xl mx-auto fade-in-up">
+                            {/* NEW: Portfolio Header with Save Button */}
+                            <div className="flex justify-between items-center mb-8 bg-white p-6 shadow-sm border border-gray-100">
+                                <h2 className="text-3xl font-serif">Portfolio Manager</h2>
+                                <button 
+                                    onClick={handleSavePortfolio}
+                                    disabled={saving}
+                                    className="bg-black text-white px-8 py-3 uppercase text-xs tracking-widest hover:bg-gray-800 transition-colors disabled:opacity-50 flex items-center gap-2"
+                                >
+                                    {saving ? 'Saving...' : <><Save size={14} /> Save All Changes</>}
+                                </button>
+                            </div>
+
                              <div className="bg-white p-8 shadow-sm mb-10 border border-gray-100">
                                 <h3 className="text-xl font-serif mb-6">Add New Work</h3>
                                 <div className="flex flex-col md:flex-row gap-6 items-end">
@@ -261,9 +289,24 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) => {
                                             <img src={item.src} alt={item.title} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" />
                                             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors"></div>
                                         </div>
-                                        <div className="p-4">
-                                            <p className="font-serif text-lg truncate">{item.title}</p>
-                                            <p className="text-[10px] uppercase tracking-widest text-gray-400 mt-1">{item.category}</p>
+                                        <div className="p-4 space-y-2">
+                                            {/* Editable Title */}
+                                            <input 
+                                                value={item.title} 
+                                                onChange={(e) => handleUpdatePortfolioState(item.id, 'title', e.target.value)}
+                                                className="w-full font-serif text-lg border-b border-transparent focus:border-black outline-none bg-transparent truncate" 
+                                            />
+                                            {/* Editable Category */}
+                                            <select 
+                                                value={item.category}
+                                                onChange={(e) => handleUpdatePortfolioState(item.id, 'category', e.target.value)}
+                                                className="text-[10px] uppercase tracking-widest text-gray-400 w-full bg-transparent outline-none cursor-pointer"
+                                            >
+                                                <option value="editorial">Editorial</option>
+                                                <option value="commercial">Commercial</option>
+                                                <option value="runway">Runway</option>
+                                                <option value="digital">Digital</option>
+                                            </select>
                                         </div>
                                         <button 
                                             onClick={() => handleDeletePortfolio(item.id)}

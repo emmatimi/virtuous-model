@@ -1,8 +1,9 @@
+/// <reference types="vite/client" />
 import { auth } from "./firebase";
 import { signInWithEmailAndPassword, signOut } from "firebase/auth";
 
 // We'll use a hardcoded email for the admin login flow to keep the UI simple (Password only)
-const ADMIN_EMAIL = "admin@virtuousmodel.com"; 
+const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL || "admin@virtuousmodel.com"; 
 
 export const login = async (passcode: string): Promise<boolean> => {
     try {
