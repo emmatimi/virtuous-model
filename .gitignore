@@ -6,3 +6,5 @@ dist/
 .DS_Store
 .cache/
 .firebase/
+.log
+.firebase-debug.log
