@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
@@ -15,18 +14,57 @@ import { Page } from './types';
 import { isAuthenticated } from './services/auth';
 
 const App: React.FC = () => {
-  const [currentPage, setCurrentPage] = useState<Page>('home');
+  // Helper to get the current page from the URL
+  const getPageFromUrl = (): Page => {
+    const params = new URLSearchParams(window.location.search);
+    const page = params.get('page');
+    const validPages: Page[] = ['home', 'about', 'portfolio', 'services', 'contact', 'admin'];
+    
+    if (page && validPages.includes(page as Page)) {
+      return page as Page;
+    }
+    return 'home';
+  };
+
+  // Initialize state directly from the URL
+  const [currentPage, setCurrentPage] = useState<Page>(getPageFromUrl);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  // Check auth on mount and check URL for secret admin access
+  // 1. Handle Browser Back/Forward Buttons
+  useEffect(() => {
+    const handlePopState = () => {
+      setCurrentPage(getPageFromUrl());
+    };
+    
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  // 2. Sync State Changes to the URL
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const urlPage = params.get('page') || 'home';
+
+    if (currentPage !== urlPage) {
+      if (currentPage === 'home') {
+        // Clean URL for home page (remove ?page=home)
+        const newUrl = window.location.pathname;
+        window.history.pushState({}, '', newUrl);
+      } else {
+        // Set param for other pages
+        params.set('page', currentPage);
+        const newUrl = `${window.location.pathname}?${params.toString()}`;
+        window.history.pushState({}, '', newUrl);
+      }
+    }
+    
+    // Scroll to top on page change
+    window.scrollTo(0, 0);
+  }, [currentPage]);
+
+  // 3. Check Auth & Shortcuts
   useEffect(() => {
     setIsLoggedIn(isAuthenticated());
-
-    // Check for secret admin URL param (?page=admin)
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('page') === 'admin') {
-      setCurrentPage('admin');
-    }
 
     // Keyboard Shortcut: Ctrl+Shift+L (or Cmd+Shift+L) to toggle Admin
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -42,7 +80,7 @@ const App: React.FC = () => {
 
   const handleLoginSuccess = () => {
     setIsLoggedIn(true);
-    setCurrentPage('admin');
+    // We remain on the 'admin' page, but now the dashboard will render
   };
 
   const renderPage = () => {
