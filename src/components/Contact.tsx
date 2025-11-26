@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { submitContactMessage } from '../services/cms';
+import SEO from './SEO';
 
 const Contact: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -39,6 +40,11 @@ const Contact: React.FC = () => {
   };
 
   return (
+    <SEO 
+        title="Contact" 
+        description="Get in touch with Virtuous Model for bookings, collaborations, and press inquiries."
+        keywords={["booking", "contact", "model agency", "inquiry"]}
+      />
     <section className="py-24 px-6 md:px-12 max-w-screen-xl mx-auto">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-20">
         
