@@ -145,14 +145,14 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage, onNavigate }) => {
             <div className="space-y-6">
                 <div>
                     <p className="text-[10px] uppercase tracking-[0.25em] text-gray-500 mb-2">Representation</p>
-                    <p className="font-serif text-2xl text-black">Elite Model Mgmt</p>
-                    <p className="text-[10px] text-gray-400 uppercase tracking-widest mt-1">New York • Paris • Milan</p>
+                    <p className="font-serif text-2xl text-black">Virtuous Model Mgmt</p>
+                    <p className="text-[10px] text-gray-400 uppercase tracking-widest mt-1">Nigeria • Lagos • Africa</p>
                 </div>
 
                 <div className="flex justify-center gap-6 text-black pt-2">
-                   <a href="#" className="p-3 border border-black/5 bg-white/50 rounded-full hover:bg-black hover:text-white transition-all duration-300"><Instagram size={18} strokeWidth={1.5} /></a>
-                   <a href="#" className="p-3 border border-black/5 bg-white/50 rounded-full hover:bg-black hover:text-white transition-all duration-300"><Twitter size={18} strokeWidth={1.5} /></a>
-                   <a href="mailto:contact@virtuousmodel.com" className="p-3 border border-black/5 bg-white/50 rounded-full hover:bg-black hover:text-white transition-all duration-300"><Mail size={18} strokeWidth={1.5} /></a>
+                   <a a href="https://www.instagram.com/eniola__oj?igsh=dnE4ZzQwb2Rhd2Iz" className="p-3 border border-black/5 bg-white/50 rounded-full hover:bg-black hover:text-white transition-all duration-300"><Instagram size={18} strokeWidth={1.5} /></a>
+                   <a href="https://wa.me/+2349018209550" className="p-3 border border-black/5 bg-white/50 rounded-full hover:bg-black hover:text-white transition-all duration-300"><Twitter size={18} strokeWidth={1.5} /></a>
+                   <a href="mailto:timiemma2024@gmail.com" className="p-3 border border-black/5 bg-white/50 rounded-full hover:bg-black hover:text-white transition-all duration-300"><Mail size={18} strokeWidth={1.5} /></a>
                 </div>
             </div>
         </div>
