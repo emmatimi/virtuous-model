@@ -1,14 +1,15 @@
+
 import React, { useState, useEffect } from 'react';
-import { getModelBio, updateModelBio, getPortfolioItems, addPortfolioItem, updatePortfolioItem, deletePortfolioItem, getServices, updateServices } from '../services/cms';
+import { getModelBio, updateModelBio, getPortfolioItems, addPortfolioItem, updatePortfolioItem, deletePortfolioItem, getServices, updateServices, getContactMessages, markMessageRead } from '../services/cms';
 import { logout } from '../services/auth';
-import { ModelBio, PortfolioItem, Service, Page } from '../types';
-import { LogOut, Save, Trash2, Plus, Layout, User, Briefcase, Image as ImageIcon, CheckCircle2, Server } from 'lucide-react';
+import { ModelBio, PortfolioItem, Service, Page, ContactMessage } from '../types';
+import { LogOut, Save, Trash2, Plus, User, Briefcase, Image as ImageIcon, CheckCircle2, Server, Mail, RefreshCw } from 'lucide-react';
 
 interface AdminDashboardProps {
     onNavigate: (page: Page) => void;
 }
 
-type Tab = 'bio' | 'portfolio' | 'services';
+type Tab = 'bio' | 'portfolio' | 'services' | 'inbox';
 
 const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) => {
     const [activeTab, setActiveTab] = useState<Tab>('bio');
@@ -19,6 +20,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) => {
     const [bio, setBio] = useState<ModelBio | null>(null);
     const [portfolio, setPortfolio] = useState<PortfolioItem[]>([]);
     const [services, setServices] = useState<Service[]>([]);
+    const [messages, setMessages] = useState<ContactMessage[]>([]);
 
     // New Item States
     const [newPortfolioItem, setNewPortfolioItem] = useState<Partial<PortfolioItem>>({ category: 'editorial' });
@@ -27,6 +29,13 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) => {
         fetchData();
     }, []);
 
+    // Re-fetch messages when switching to inbox
+    useEffect(() => {
+        if (activeTab === 'inbox') {
+            fetchMessages();
+        }
+    }, [activeTab]);
+
     const fetchData = async () => {
         const bioData = await getModelBio();
         const portfolioData = await getPortfolioItems('all');
@@ -34,6 +43,12 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) => {
         setBio(bioData);
         setPortfolio(portfolioData);
         setServices(servicesData);
+        fetchMessages();
+    };
+
+    const fetchMessages = async () => {
+        const msgs = await getContactMessages();
+        setMessages(msgs);
     };
 
     const handleLogout = () => {
@@ -111,7 +126,15 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) => {
         showNotification("Services Updated");
     };
 
+    // --- INBOX HANDLERS ---
+    const handleMarkRead = async (id: string) => {
+        await markMessageRead(id);
+        setMessages(prev => prev.map(m => m.id === id ? { ...m, read: true } : m));
+    };
+
     if (!bio) return <div className="min-h-screen flex items-center justify-center"><div className="w-1 h-12 bg-black animate-pulse"></div></div>;
+
+    const unreadCount = messages.filter(m => !m.read).length;
 
     return (
         <div className="min-h-screen bg-gray-50 font-sans">
@@ -152,6 +175,17 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) => {
                                     className={`w-full p-3 text-left text-xs uppercase tracking-widest hover:bg-gray-50 flex items-center gap-3 rounded-md transition-all ${activeTab === 'services' ? 'bg-black text-white shadow-lg' : 'text-gray-500'}`}
                                 >
                                     <Briefcase size={16} /> Services
+                                </button>
+                                <button 
+                                    onClick={() => setActiveTab('inbox')}
+                                    className={`w-full p-3 text-left text-xs uppercase tracking-widest hover:bg-gray-50 flex items-center gap-3 rounded-md transition-all ${activeTab === 'inbox' ? 'bg-black text-white shadow-lg' : 'text-gray-500'}`}
+                                >
+                                    <Mail size={16} /> Inbox 
+                                    {unreadCount > 0 && (
+                                        <span className={`ml-auto px-2 py-0.5 rounded-full text-[10px] ${activeTab === 'inbox' ? 'bg-white text-black' : 'bg-black text-white'}`}>
+                                            {unreadCount}
+                                        </span>
+                                    )}
                                 </button>
                             </nav>
                         </div>
@@ -372,6 +406,53 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) => {
                                         </div>
                                     </div>
                                 ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* --- INBOX TAB --- */}
+                    {activeTab === 'inbox' && (
+                        <div className="max-w-4xl mx-auto bg-white shadow-sm border border-gray-100 fade-in-up min-h-[500px] flex flex-col">
+                            <div className="flex justify-between items-center p-6 border-b border-gray-100">
+                                <h2 className="text-3xl font-serif">Inbox</h2>
+                                <button onClick={fetchMessages} className="text-gray-400 hover:text-black transition-colors p-2">
+                                    <RefreshCw size={16} />
+                                </button>
+                            </div>
+
+                            <div className="divide-y divide-gray-100">
+                                {messages.length === 0 ? (
+                                    <div className="p-10 text-center text-gray-400">
+                                        <Mail size={48} className="mx-auto mb-4 opacity-20" />
+                                        <p className="uppercase tracking-widest text-xs">No messages yet</p>
+                                    </div>
+                                ) : (
+                                    messages.map((msg) => (
+                                        <div 
+                                            key={msg.id} 
+                                            onClick={() => msg.id && !msg.read && handleMarkRead(msg.id)}
+                                            className={`p-6 hover:bg-gray-50 transition-colors cursor-pointer ${!msg.read ? 'bg-blue-50/30' : ''}`}
+                                        >
+                                            <div className="flex justify-between items-start mb-2">
+                                                <div className="flex items-center gap-2">
+                                                    {!msg.read && <div className="w-2 h-2 bg-blue-500 rounded-full"></div>}
+                                                    <span className={`font-serif text-lg ${!msg.read ? 'font-bold' : ''}`}>{msg.name}</span>
+                                                    <span className="text-xs text-gray-400 mx-2">•</span>
+                                                    <span className="text-xs text-gray-500 uppercase tracking-wider">{msg.subject}</span>
+                                                </div>
+                                                <span className="text-[10px] text-gray-400 uppercase tracking-widest">
+                                                    {msg.timestamp ? new Date(msg.timestamp).toLocaleDateString() : 'Unknown Date'}
+                                                </span>
+                                            </div>
+                                            <div className="pl-4 border-l-2 border-gray-100 ml-1">
+                                                <p className="text-sm text-gray-600 leading-relaxed mb-2">{msg.message}</p>
+                                                <a href={`mailto:${msg.email}`} className="text-[10px] uppercase tracking-widest text-gray-400 hover:text-black border-b border-transparent hover:border-black transition-all inline-block pb-0.5">
+                                                    Reply to {msg.email}
+                                                </a>
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
                             </div>
                         </div>
                     )}
