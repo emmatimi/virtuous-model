@@ -98,7 +98,7 @@ const Portfolio: React.FC = () => {
                   <img 
                     src={item.src} 
                     alt={item.title} 
-                    className="w-full h-auto object-cover transition-transform duration-1000 ease-out group-hover:scale-105 filter grayscale-[20%] group-hover:grayscale-0"
+                    className="w-full h-auto object-cover transition-transform duration-1000 ease-out group-hover:scale-105 filter md:grayscale-[20%] group-hover:grayscale-0"
                     loading="lazy"
                   />
                 </div>
