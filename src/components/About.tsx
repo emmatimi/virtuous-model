@@ -56,7 +56,7 @@ const About: React.FC = () => {
             <img 
               src={data.profileImage} 
               alt="Virtuous Model Portrait" 
-              className="w-full h-auto object-cover grayscale hover:grayscale-0 transition-all duration-700"
+              className="w-full h-auto object-cover md:grayscale md:hover:grayscale-0 transition-all duration-700"
             />
           </div>
 
