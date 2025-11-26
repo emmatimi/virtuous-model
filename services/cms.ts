@@ -1,6 +1,6 @@
 
-import { PortfolioItem, Service, ModelBio } from "../types";
-import { MODEL_STATS, SERVICES, PORTFOLIO_ITEMS } from "../constants";
+import { PortfolioItem, Service, ModelBio } from "../src/types";
+import { MODEL_STATS, SERVICES, PORTFOLIO_ITEMS } from "../src/constants";
 
 /**
  * CMS SERVICE - LOCAL STORAGE IMPLEMENTATION

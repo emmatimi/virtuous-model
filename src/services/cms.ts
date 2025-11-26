@@ -84,15 +84,26 @@ export const updateModelBio = async (data: ModelBio): Promise<void> => {
 
 // --- PORTFOLIO ---
 
+
 export const getPortfolioItems = async (category?: string): Promise<PortfolioItem[]> => {
     try {
         const querySnapshot = await getDocs(collection(db, COLLECTIONS.PORTFOLIO));
-        let items: PortfolioItem[] = [];
+        
+        // Use a Map to ensure uniqueness based on the 'id' property
+        const uniqueItems = new Map<number, PortfolioItem>();
         
         querySnapshot.forEach((doc) => {
-            // We use the 'id' field from the data, but fallback to doc.id if needed
-            items.push({ ...doc.data(), id: doc.data().id || parseInt(doc.id) } as PortfolioItem);
+            const data = doc.data();
+            // Handle legacy or numeric IDs
+            const id = data.id ? Number(data.id) : parseInt(doc.id);
+            
+            // Only add if we haven't seen this ID before
+            if (!uniqueItems.has(id)) {
+                uniqueItems.set(id, { ...data, id } as PortfolioItem);
+            }
         });
+
+        let items = Array.from(uniqueItems.values());
 
         if (items.length === 0) return PORTFOLIO_ITEMS; // Fallback
 
@@ -108,6 +119,7 @@ export const getPortfolioItems = async (category?: string): Promise<PortfolioIte
         return PORTFOLIO_ITEMS;
     }
 };
+
 
 export const addPortfolioItem = async (item: PortfolioItem): Promise<void> => {
     // Ensure demo data exists in DB before adding new item
