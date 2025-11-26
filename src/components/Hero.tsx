@@ -15,7 +15,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
         className="absolute inset-0 bg-cover bg-[center_top] md:bg-center bg-no-repeat transition-transform duration-[20s] hover:scale-105"
         style={{ backgroundImage: 'url("https://ik.imagekit.io/4lndq5ke52/bg4.png?q=80&w=2940&auto=format&fit=crop")' }}
       >
-         <div className="absolute inset-0 bg-black/40" /> {/* Refined overlay opacity for better text contrast */}
+         <div className="absolute inset-0 bg-black/40" />
       </div>
 
       {/* Content */}
