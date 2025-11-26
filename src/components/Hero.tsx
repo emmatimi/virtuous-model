@@ -2,6 +2,7 @@
 import React from 'react';
 import { Page } from '../types';
 import { MODEL_TAGLINE } from '../constants';
+import SEO from './SEO';
 
 interface HeroProps {
   onNavigate: (page: Page) => void;
@@ -10,12 +11,17 @@ interface HeroProps {
 const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
   return (
     <div className="relative h-screen w-full overflow-hidden">
+      <SEO 
+        title="Home" 
+        description="Virtuous Model Portfolio. A luxury fashion and editorial modeling portfolio based in Lagos and New York. Available for bookings worldwide."
+        keywords={["model", "fashion", "editorial", "runway", "Lagos model", "New York model", "Virtuous Model", "commercial modeling"]}
+      />
       {/* Background Image */}
       <div 
         className="absolute inset-0 bg-cover bg-[center_top] md:bg-center bg-no-repeat transition-transform duration-[20s] hover:scale-105"
         style={{ backgroundImage: 'url("https://ik.imagekit.io/4lndq5ke52/bg4.png?q=80&w=2940&auto=format&fit=crop")' }}
       >
-         <div className="absolute inset-0 bg-black/40" />
+         <div className="absolute inset-0 bg-black/40" /> {/* Refined overlay opacity for better text contrast */}
       </div>
 
       {/* Content */}
