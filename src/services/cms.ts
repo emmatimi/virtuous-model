@@ -1,7 +1,7 @@
 
 import { PortfolioItem, Service, ModelBio, ContactMessage } from "@/types";
 import { MODEL_STATS, SERVICES, PORTFOLIO_ITEMS } from "@/constants";
-import { db } from "/firebase";
+import { db } from "@/firebase";
 import { doc, getDoc, setDoc, collection, getDocs, addDoc, deleteDoc, query, where, updateDoc } from "firebase/firestore";
 
 /**
