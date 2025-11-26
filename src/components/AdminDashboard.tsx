@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { getModelBio, updateModelBio, getPortfolioItems, addPortfolioItem, updatePortfolioItem, deletePortfolioItem, getServices, updateServices, getContactMessages, markMessageRead } from '../services/cms';
+import { getModelBio, updateModelBio, getPortfolioItems, addPortfolioItem, updatePortfolioItem, deletePortfolioItem, getServices, updateServices, getContactMessages, markMessageRead, deleteContactMessage } from '../services/cms';
 import { logout } from '../services/auth';
 import { ModelBio, PortfolioItem, Service, Page, ContactMessage } from '../types';
 import { LogOut, Save, Trash2, Plus, User, Briefcase, Image as ImageIcon, CheckCircle2, Server, Mail, RefreshCw } from 'lucide-react';
@@ -130,6 +130,13 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) => {
     const handleMarkRead = async (id: string) => {
         await markMessageRead(id);
         setMessages(prev => prev.map(m => m.id === id ? { ...m, read: true } : m));
+    };
+     const handleDeleteMessage = async (id: string) => {
+        if (confirm('Are you sure you want to delete this message?')) {
+            await deleteContactMessage(id);
+            setMessages(prev => prev.filter(m => m.id !== id));
+            showNotification("Message Deleted");
+        }
     };
 
     if (!bio) return <div className="min-h-screen flex items-center justify-center"><div className="w-1 h-12 bg-black animate-pulse"></div></div>;
@@ -443,6 +450,13 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) => {
                                                 <span className="text-[10px] text-gray-400 uppercase tracking-widest">
                                                     {msg.timestamp ? new Date(msg.timestamp).toLocaleDateString() : 'Unknown Date'}
                                                 </span>
+                                                 <button 
+                                                        onClick={(e) => { e.stopPropagation(); msg.id && handleDeleteMessage(msg.id); }}
+                                                        className="text-gray-300 hover:text-red-500 transition-colors p-1"
+                                                        title="Delete Message"
+                                                    >
+                                                        <Trash2 size={14} />
+                                                    </button>
                                             </div>
                                             <div className="pl-4 border-l-2 border-gray-100 ml-1">
                                                 <p className="text-sm text-gray-600 leading-relaxed mb-2">{msg.message}</p>
