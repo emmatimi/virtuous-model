@@ -1,7 +1,8 @@
+
 import React, { useEffect } from 'react';
 import { SEOProps } from '../types';
 
-const SEO: React.FC<SEOProps> = ({ title, description, image, type = 'website', schema }) => {
+const SEO: React.FC<SEOProps> = ({ title, description, image, type = 'website', schema, keywords, canonical }) => {
   const siteTitle = "Virtuous Model | Portfolio";
   const fullTitle = title === "Home" ? siteTitle : `${title} | Virtuous Model`;
   const metaImage = image || "https://picsum.photos/1200/630?grayscale";
@@ -24,6 +25,9 @@ const SEO: React.FC<SEOProps> = ({ title, description, image, type = 'website', 
 
     // Standard Meta
     updateMeta('description', description);
+    if (keywords && keywords.length > 0) {
+      updateMeta('keywords', keywords.join(', '));
+    }
 
     // Open Graph
     updateMeta('og:title', fullTitle, 'property');
@@ -38,6 +42,15 @@ const SEO: React.FC<SEOProps> = ({ title, description, image, type = 'website', 
     updateMeta('twitter:description', description);
     updateMeta('twitter:image', metaImage);
 
+    // Canonical Link
+    let link = document.querySelector("link[rel='canonical']");
+    if (!link) {
+        link = document.createElement('link');
+        link.setAttribute('rel', 'canonical');
+        document.head.appendChild(link);
+    }
+    link.setAttribute('href', canonical || currentUrl);
+
     // Structured Data (JSON-LD)
     if (schema) {
       const scriptId = 'structured-data';
@@ -51,10 +64,7 @@ const SEO: React.FC<SEOProps> = ({ title, description, image, type = 'website', 
       script.textContent = JSON.stringify(schema);
     }
 
-    // Cleanup not strictly necessary for client-side nav in this context as we overwrite,
-    // but good practice would be to revert to default on unmount if complex.
-
-  }, [fullTitle, description, metaImage, currentUrl, type, schema]);
+  }, [fullTitle, description, metaImage, currentUrl, type, schema, keywords, canonical]);
 
   return null;
 };
