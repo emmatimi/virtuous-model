@@ -60,4 +60,6 @@ export interface SEOProps {
     image?: string;
     type?: 'website' | 'article' | 'profile';
     schema?: Record<string, any>;
+    keywords?: string[];
+    canonical?: string;
 }
