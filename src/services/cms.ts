@@ -1,8 +1,8 @@
 
-import { PortfolioItem, Service, ModelBio } from "../types";
-import { MODEL_STATS, SERVICES, PORTFOLIO_ITEMS } from "../constants";
+import { PortfolioItem, Service, ModelBio, ContactMessage } from "@/types";
+import { MODEL_STATS, SERVICES, PORTFOLIO_ITEMS } from "@/constants";
 import { db } from "./firebase";
-import { doc, getDoc, setDoc, collection, getDocs, addDoc, deleteDoc, query, where } from "firebase/firestore";
+import { doc, getDoc, setDoc, collection, getDocs, addDoc, deleteDoc, query, where, updateDoc } from "firebase/firestore";
 
 /**
  * CMS SERVICE - FIREBASE IMPLEMENTATION
@@ -13,7 +13,8 @@ import { doc, getDoc, setDoc, collection, getDocs, addDoc, deleteDoc, query, whe
 const COLLECTIONS = {
     BIO: 'bio',
     PORTFOLIO: 'portfolio',
-    SERVICES: 'services'
+    SERVICES: 'services',
+    MESSAGES: 'messages'
 };
 
 // --- HELPER: MIGRATION ---
@@ -84,7 +85,6 @@ export const updateModelBio = async (data: ModelBio): Promise<void> => {
 
 // --- PORTFOLIO ---
 
-
 export const getPortfolioItems = async (category?: string): Promise<PortfolioItem[]> => {
     try {
         const querySnapshot = await getDocs(collection(db, COLLECTIONS.PORTFOLIO));
@@ -94,11 +94,13 @@ export const getPortfolioItems = async (category?: string): Promise<PortfolioIte
         
         querySnapshot.forEach((doc) => {
             const data = doc.data();
-            // Handle legacy or numeric IDs
-            const id = data.id ? Number(data.id) : parseInt(doc.id);
+            // Handle legacy or numeric IDs. If data.id exists use it, otherwise parse doc.id
+            // Ensuring we have a numeric ID as expected by the type definition
+            const rawId = data.id !== undefined ? data.id : doc.id;
+            const id = Number(rawId);
             
-            // Only add if we haven't seen this ID before
-            if (!uniqueItems.has(id)) {
+            // Only add if we haven't seen this ID before and it's a valid number
+            if (!isNaN(id) && !uniqueItems.has(id)) {
                 uniqueItems.set(id, { ...data, id } as PortfolioItem);
             }
         });
@@ -119,7 +121,6 @@ export const getPortfolioItems = async (category?: string): Promise<PortfolioIte
         return PORTFOLIO_ITEMS;
     }
 };
-
 
 export const addPortfolioItem = async (item: PortfolioItem): Promise<void> => {
     // Ensure demo data exists in DB before adding new item
@@ -208,3 +209,46 @@ export const updateServices = async (services: Service[]): Promise<void> => {
     });
     await Promise.all(addPromises);
 };
+
+// --- CONTACT MESSAGES ---
+
+export const submitContactMessage = async (data: ContactMessage): Promise<void> => {
+    try {
+        await addDoc(collection(db, COLLECTIONS.MESSAGES), {
+            ...data,
+            timestamp: new Date().toISOString(),
+            read: false
+        });
+    } catch (e) {
+        console.error("Error submitting contact message", e);
+        throw e;
+    }
+};
+
+export const getContactMessages = async (): Promise<ContactMessage[]> => {
+    try {
+        const querySnapshot = await getDocs(collection(db, COLLECTIONS.MESSAGES));
+        let messages: ContactMessage[] = [];
+        querySnapshot.forEach((doc) => {
+            messages.push({ id: doc.id, ...doc.data() } as ContactMessage);
+        });
+        
+        // Sort by timestamp descending (newest first)
+        messages.sort((a, b) => {
+            return new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime();
+        });
+        
+        return messages;
+    } catch (e) {
+        console.error("Error getting messages", e);
+        return [];
+    }
+};
+
+export const markMessageRead = async (id: string): Promise<void> => {
+    const docRef = doc(db, COLLECTIONS.MESSAGES, id);
+    await updateDoc(docRef, { read: true });
+};
+// export const deleteMessage = async (id: string): Promise<void> => {
+//     await deleteDoc(doc(db, COLLECTIONS.MESSAGES, id));
+// }
