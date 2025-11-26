@@ -1,4 +1,3 @@
-
 export type Page = 'home' | 'about' | 'portfolio' | 'services' | 'contact' | 'admin';
 
 export interface PortfolioItem {
@@ -32,6 +31,16 @@ export interface ModelBio {
     bio: string;
     stats: Stat[];
     profileImage: string;
+}
+
+export interface ContactMessage {
+  id?: string;
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+  timestamp?: any; // Firestore timestamp or Date
+  read?: boolean;
 }
 
 export enum MessageRole {
