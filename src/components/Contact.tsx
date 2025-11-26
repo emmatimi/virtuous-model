@@ -33,7 +33,7 @@ const Contact: React.FC = () => {
         // Reset status after 5 seconds
         setTimeout(() => setStatus('idle'), 5000);
     } catch (error) {
-        console.error(error);
+        console.error("Contact form error:", error);
         setStatus('error');
     }
   };
@@ -98,7 +98,7 @@ const Contact: React.FC = () => {
                     value={formData.name}
                     onChange={handleChange}
                     type="text" 
-                    className="bg-transparent border-b border-gray-300 py-2 focus:outline-none focus:border-black transition-colors rounded-none"
+                    className="bg-transparent border-b border-gray-300 py-2 focus:outline-none focus:border-black transition-colors rounded-none w-full"
                     placeholder="Jane Doe"
                   />
                 </div>
@@ -110,7 +110,7 @@ const Contact: React.FC = () => {
                     value={formData.email}
                     onChange={handleChange}
                     type="email" 
-                    className="bg-transparent border-b border-gray-300 py-2 focus:outline-none focus:border-black transition-colors rounded-none"
+                    className="bg-transparent border-b border-gray-300 py-2 focus:outline-none focus:border-black transition-colors rounded-none w-full"
                     placeholder="jane@agency.com"
                   />
                 </div>
@@ -122,7 +122,7 @@ const Contact: React.FC = () => {
                   name="subject"
                   value={formData.subject}
                   onChange={handleChange}
-                  className="bg-transparent border-b border-gray-300 py-2 focus:outline-none focus:border-black transition-colors rounded-none"
+                  className="bg-transparent border-b border-gray-300 py-2 focus:outline-none focus:border-black transition-colors rounded-none w-full"
                 >
                    <option value="" disabled>Select inquiry type</option>
                    <option value="booking">Booking Inquiry</option>
@@ -140,13 +140,16 @@ const Contact: React.FC = () => {
                   value={formData.message}
                   onChange={handleChange}
                   rows={4} 
-                  className="bg-transparent border-b border-gray-300 py-2 focus:outline-none focus:border-black transition-colors rounded-none resize-none"
+                  className="bg-transparent border-b border-gray-300 py-2 focus:outline-none focus:border-black transition-colors rounded-none resize-none w-full"
                   placeholder="Tell us about your project..."
                 />
               </div>
 
               {status === 'error' && (
-                  <p className="text-red-500 text-xs tracking-widest">Something went wrong. Please try again or email us directly.</p>
+                  <div className="text-red-500 text-xs tracking-widest bg-red-50 p-4 border-l-2 border-red-500">
+                      <p className="font-bold mb-1">Delivery Failed</p>
+                      <p>Please email us directly at <a href="mailto:bookings@virtuousmodel.com" className="underline text-black">bookings@virtuousmodel.com</a></p>
+                  </div>
               )}
 
               <button 
