@@ -5,7 +5,7 @@ import { SEOProps } from '../types';
 const SEO: React.FC<SEOProps> = ({ title, description, image, type = 'website', schema, keywords, canonical }) => {
   const siteTitle = "Virtuous Model | Portfolio";
   const fullTitle = title === "Home" ? siteTitle : `${title} | Virtuous Model`;
-  const metaImage = image || "https://picsum.photos/1200/630?grayscale";
+  const metaImage = image || "https://ik.imagekit.io/4lndq5ke52/bg4.png?grayscale";
   const currentUrl = window.location.href;
 
   useEffect(() => {
