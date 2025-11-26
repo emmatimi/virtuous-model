@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { submitContactMessage } from '../services/cms';
 
 const Contact: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -8,20 +9,33 @@ const Contact: React.FC = () => {
     subject: '',
     message: ''
   });
-  const [status, setStatus] = useState<'idle' | 'submitting' | 'success'>('idle');
+  const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setStatus('submitting');
-    // Simulate API call
-    setTimeout(() => {
-      setStatus('success');
-      setFormData({ name: '', email: '', subject: '', message: '' });
-    }, 1500);
+    
+    try {
+        await submitContactMessage({
+            name: formData.name,
+            email: formData.email,
+            subject: formData.subject,
+            message: formData.message
+        });
+        
+        setStatus('success');
+        setFormData({ name: '', email: '', subject: '', message: '' });
+        
+        // Reset status after 5 seconds
+        setTimeout(() => setStatus('idle'), 5000);
+    } catch (error) {
+        console.error(error);
+        setStatus('error');
+    }
   };
 
   return (
@@ -130,6 +144,10 @@ const Contact: React.FC = () => {
                   placeholder="Tell us about your project..."
                 />
               </div>
+
+              {status === 'error' && (
+                  <p className="text-red-500 text-xs tracking-widest">Something went wrong. Please try again or email us directly.</p>
+              )}
 
               <button 
                 type="submit" 
