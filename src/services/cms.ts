@@ -249,6 +249,7 @@ export const markMessageRead = async (id: string): Promise<void> => {
     const docRef = doc(db, COLLECTIONS.MESSAGES, id);
     await updateDoc(docRef, { read: true });
 };
-// export const deleteMessage = async (id: string): Promise<void> => {
-//     await deleteDoc(doc(db, COLLECTIONS.MESSAGES, id));
-// }
+export const deleteContactMessage = async (id: string): Promise<void> => {
+    await deleteDoc(doc(db, COLLECTIONS.MESSAGES, id));
+};
+
