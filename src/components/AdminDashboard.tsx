@@ -320,7 +320,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) => {
                                 {portfolio.map(item => (
                                     <div key={item.id} className="relative group bg-white shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-all">
                                         <div className="relative aspect-[3/4] overflow-hidden">
-                                            <img src={item.src} alt={item.title} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" />
+                                            <img src={item.src} alt={item.title} className="w-full h-full object-cover md:grayscale group-hover:grayscale-0 transition-all duration-500" />
                                             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors"></div>
                                         </div>
                                         <div className="p-4 space-y-2">
