@@ -150,7 +150,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage, onNavigate }) => {
                 </div>
 
                 <div className="flex justify-center gap-6 text-black pt-2">
-                   <a a href="https://www.instagram.com/eniola__oj?igsh=dnE4ZzQwb2Rhd2Iz" className="p-3 border border-black/5 bg-white/50 rounded-full hover:bg-black hover:text-white transition-all duration-300"><Instagram size={18} strokeWidth={1.5} /></a>
+                   <a href="https://www.instagram.com/eniola__oj?igsh=dnE4ZzQwb2Rhd2Iz" className="p-3 border border-black/5 bg-white/50 rounded-full hover:bg-black hover:text-white transition-all duration-300"><Instagram size={18} strokeWidth={1.5} /></a>
                    <a href="https://wa.me/+2349018209550" className="p-3 border border-black/5 bg-white/50 rounded-full hover:bg-black hover:text-white transition-all duration-300"><Twitter size={18} strokeWidth={1.5} /></a>
                    <a href="mailto:timiemma2024@gmail.com" className="p-3 border border-black/5 bg-white/50 rounded-full hover:bg-black hover:text-white transition-all duration-300"><Mail size={18} strokeWidth={1.5} /></a>
                 </div>
